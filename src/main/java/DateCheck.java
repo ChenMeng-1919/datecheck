@@ -1,6 +1,11 @@
 import com.alibaba.excel.EasyExcel;
+import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,13 +17,18 @@ import java.util.Set;
  * @since: Created in 2023/6/15 13:12
  * @description:
  */
+@Slf4j
 public class DateCheck {
     public static void main(String[] args) {
-        String csvFile = "C:\\cm\\workspace\\my-sources\\datecheck\\src\\main\\resources\\123.csv";
+        //String csvFileName = args[0];
+        String csvFileName = "123.csv";
+        File jarFile = new File(DateCheck.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        String jarAbsolutePath = jarFile.getAbsolutePath();
         DataListener dataListener = new DataListener();
-        EasyExcel.read(csvFile, DateEntity.class, dataListener).sheet().doRead();
+        String pathName = jarAbsolutePath + "\\" + csvFileName;
+        EasyExcel.read(pathName, DateEntity.class, dataListener).sheet().doRead();
         List<DateEntity> cachedDataList = dataListener.cachedDataList;
-
+        log.info(pathName);
         // 创建一个 HashSet 来存储不同的日期
         Set<String> uniqueDates = new HashSet<>();
         // 遍历对象集合，提取日期部分并添加到 HashSet 中
@@ -28,9 +38,16 @@ public class DateCheck {
             String dateStr = dateFormat.format(serverReceiveTime);
             uniqueDates.add(dateStr);
         }
-        // 打印出不同的日期
-        for (String date : uniqueDates) {
-            System.out.println(date);
+        // 创建一个名为 result.txt 的文件，并将 uniqueDates 中的每个元素写入文件
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.txt"))) {
+            for (String date : uniqueDates) {
+                writer.write(date);
+                writer.newLine();
+            }
+            log.info("写入完成");
+        } catch (IOException e) {
+            log.info("写入文件时发生错误：" + e.getMessage());
         }
+
     }
 }
