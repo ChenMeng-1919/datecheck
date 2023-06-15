@@ -25,10 +25,12 @@ public class DateCheck {
         File jarFile = new File(DateCheck.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         String jarAbsolutePath = jarFile.getAbsolutePath();
         DataListener dataListener = new DataListener();
-        String pathName = jarAbsolutePath + "\\" + csvFileName;
+        int lastIndex = jarAbsolutePath.lastIndexOf("\\");
+        String substring = jarAbsolutePath.substring(0, lastIndex);
+        String pathName = substring + "\\" + csvFileName;
+        log.info(pathName);
         EasyExcel.read(pathName, DateEntity.class, dataListener).sheet().doRead();
         List<DateEntity> cachedDataList = dataListener.cachedDataList;
-        log.info(pathName);
         // 创建一个 HashSet 来存储不同的日期
         Set<String> uniqueDates = new HashSet<>();
         // 遍历对象集合，提取日期部分并添加到 HashSet 中
